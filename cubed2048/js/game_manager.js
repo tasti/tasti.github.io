@@ -69,8 +69,8 @@ GameManager.prototype.animate = function() {
         if(this.grid) {
           this.grid.eachCell(function(x,y,cell) {
             if(cell) {
-              cell.mesh.rotation.x += cell.value / 200;
-              cell.mesh.rotation.y += cell.value / 200;
+              cell.mesh.rotation.x += cell.value / (200 * Math.log(cell.value));
+              cell.mesh.rotation.y += cell.value / (200 * Math.log(cell.value));
             }
           });
         }
@@ -104,9 +104,17 @@ GameManager.prototype.setup_graphics = function () {
   var geometry = new THREE.BoxGeometry( 20, 20, 20 );
   //var texture = THREE.ImageUtils.loadTexture( 'textures/crate.gif' );
 
-  var material = new THREE.MeshBasicMaterial( {color:0xeee4da, wireframe: false, vertexColors: THREE.VertexColors} );
+  var material = new THREE.MeshBasicMaterial( {color:0xeee4da, wireframe: false, vertexColors: THREE.VertexColors, recieveShadow: true} );
 
   this.mesh = new THREE.Mesh( geometry, material );
+
+  var hemiLight = new THREE.HemisphereLight( 0xffffff, 0xffffff, 0.95 );
+  hemiLight.color.setHSL( 1, 1, 1 );
+  hemiLight.groundColor.setHSL( 0.095, 1, 0.75 );
+  hemiLight.position.set( 0, 500, 0 );
+  this.scene.add( hemiLight );
+
+
 
   window.addEventListener( 'resize', onWindowResize, false );
   function onWindowResize() {

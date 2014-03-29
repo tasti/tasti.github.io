@@ -51,6 +51,12 @@ HTMLActuator.prototype.clearContainer = function (container, scene) {
           scene.remove(scene.children[0]);
      }
     }
+  var hemiLight = new THREE.HemisphereLight( 0xffffff, 0xffffff, 0.95 );
+  hemiLight.color.setHSL( 1, 1, 1 );
+  hemiLight.groundColor.setHSL( 0.095, 1, 0.75 );
+  hemiLight.position.set( 0, 500, 0 );
+  if(scene) {scene.add( hemiLight );}
+
 };
 
 HTMLActuator.prototype.addTile = function (tile) {

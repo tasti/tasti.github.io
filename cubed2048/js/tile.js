@@ -14,22 +14,36 @@ function Tile(position, value, _mesh, scene) {
 
   var canvas1 = document.createElement('canvas');
   var context1 = canvas1.getContext('2d');
-  context1.lineWidth = 3;
-  context1.strokeStyle = "black";
-  context1.font = "Bold 96px Helvetica Neue";
+  context1.lineWidth = 13;
+  if(value == 2 || value == 4) {
+    context1.strokeStyle = "#776e65";
+  } else {
+    context1.strokeStyle = "#f9f6f2";
+  }
+  context1.font = "96px Helvetica Neue";
 
   context1.fillStyle = "#" + valueToHex(this.value, colors).toUpperCase();
   context1.fillRect(0,0,1000,1000);
-  context1.strokeText(this.value.toString(), 125, 105);
-
-    
+  var str = this.value.toString();
+  var x = 0;
+  if(str.length == 1) {
+    x = 125;
+  } else if (str.length == 2) {
+    x = 100;
+  } else if (str.length == 3) {
+    x = 70;
+  } else {
+    x = 50;
+  }
+  
+  context1.strokeText(str, x, 105);
   // canvas contents will be used for a texture
   var texture1 = new THREE.Texture(canvas1); 
   texture1.needsUpdate = true;
 
   //var texture = THREE.ImageUtils.loadTexture( 'textures/crate.gif' );
-  var material = new THREE.MeshBasicMaterial( {map: texture1, wireframe: false, vertexColors: THREE.VertexColors} );
-
+  var material = new THREE.MeshPhongMaterial( {map: texture1, wireframe: false, vertexColors: THREE.VertexColors, recieveShadow: true } );
+  
   this.mesh = new THREE.Mesh( geometry, material );
 
   this.mesh.position.x = this.x * 110;
@@ -37,7 +51,8 @@ function Tile(position, value, _mesh, scene) {
   this.scene = scene;
   this.previousPosition = null;
   this.mergedFrom       = null; // Tracks tiles that merged together
-  //scene.add(this.mesh);
+  scene.add(this.mesh);
+
 }
 
 Tile.prototype.savePosition = function () {
