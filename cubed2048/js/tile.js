@@ -32,8 +32,8 @@ function Tile(position, value, _mesh, scene) {
 
   this.mesh = new THREE.Mesh( geometry, material );
 
-  this.mesh.position.x = this.x * 100;
-  this.mesh.position.y = this.y * 100;
+  this.mesh.position.x = this.x * 110;
+  this.mesh.position.y = this.y * 110;
   this.scene = scene;
   this.previousPosition = null;
   this.mergedFrom       = null; // Tracks tiles that merged together
@@ -47,8 +47,8 @@ Tile.prototype.savePosition = function () {
 Tile.prototype.updatePosition = function (position) {
   this.x = position.x;
   this.y = position.y;
-  this.mesh.position.x = position.x * 100;
-  this.mesh.position.y = position.y * 100;
+  this.mesh.position.x = position.x * 110;
+  this.mesh.position.y = position.y * 110;
 };
 
 Tile.prototype.serialize = function () {

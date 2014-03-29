@@ -66,10 +66,13 @@ GameManager.prototype.setup = function () {
 GameManager.prototype.animate = function() {
         requestAnimationFrame($.proxy(this.animate, this));
         //this.controls.update();
-
-        for(var i = 0; i < this.scene.children.length; i++) {
-           this.scene.children[i].rotation.x += 0.05;
-           this.scene.children[i].rotation.y += 0.01;
+        if(this.grid) {
+          this.grid.eachCell(function(x,y,cell) {
+            if(cell) {
+              cell.mesh.rotation.x += cell.value / 100;
+              cell.mesh.rotation.y += cell.value / 100;
+            }
+          });
         }
 
         this.renderer.render( this.scene, this.camera ); 
@@ -86,14 +89,15 @@ GameManager.prototype.setup_graphics = function () {
 
   this.renderer = new THREE.WebGLRenderer({ alpha: true });
   this.renderer.setSize( x, y );
-  this.renderer.setClearColor( 0xbbada0, 1);
+  //this.renderer.setClearColor( 0xbbada0, 1);
+  //this.renderer.setClearColor( 0xFFFFFF, 1);
   tile_container.empty();
   tile_container.append( this.renderer.domElement );
   //document.body.appendChild(this.renderer.domElement);
   this.camera = new THREE.PerspectiveCamera( 70, x / y, 1, 20000 );
-  this.camera.position.x = 150;
-  this.camera.position.y = 150;
-  this.camera.position.z = 315;
+  this.camera.position.x = 170;
+  this.camera.position.y = 170;
+  this.camera.position.z = 320;
   //this.camera.rotation.z = Math.PI;
   //this.controls = new THREE.OrbitControls(this.camera);
   this.scene = new THREE.Scene();
