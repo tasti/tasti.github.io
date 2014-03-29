@@ -26,8 +26,9 @@
 
             function init() {
 
-                renderer = new THREE.WebGLRenderer();
+                renderer = new THREE.WebGLRenderer( { alpha: true } );
                 renderer.setSize( window.innerWidth, window.innerHeight );
+                renderer.setClearColor( 0xfaf8ef, 1);
                 document.body.appendChild( renderer.domElement );
 
                 //
@@ -37,7 +38,7 @@
 
                 scene = new THREE.Scene();
 
-                var geometry = new THREE.BoxGeometry( 200, 200, 200 );
+                var geometry = new THREE.BoxGeometry( 250, 250, 250 );
 
                 var texture = THREE.ImageUtils.loadTexture( 'textures/crate.gif' );
                 texture.anisotropy = renderer.getMaxAnisotropy();

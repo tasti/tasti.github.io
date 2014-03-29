@@ -10,6 +10,7 @@ function GameManager(size, InputManager, Actuator, StorageManager) {
   this.inputManager.on("restart", this.restart.bind(this));
   this.inputManager.on("keepPlaying", this.keepPlaying.bind(this));
 
+  this.setup_graphics();
   this.setup();
 }
 
@@ -17,6 +18,7 @@ function GameManager(size, InputManager, Actuator, StorageManager) {
 GameManager.prototype.restart = function () {
   this.storageManager.clearGameState();
   this.actuator.continueGame(); // Clear the game won/lost message
+  this.setup_graphics();
   this.setup();
 };
 
@@ -42,13 +44,13 @@ GameManager.prototype.setup = function () {
   // Reload the game from a previous game if present
   if (previousState) {
     this.grid        = new Grid(previousState.grid.size,
-                                previousState.grid.cells); // Reload grid
+                                previousState.grid.cells, this.mesh, this.scene); // Reload grid
     this.score       = previousState.score;
     this.over        = previousState.over;
     this.won         = previousState.won;
     this.keepPlaying = previousState.keepPlaying;
   } else {
-    this.grid        = new Grid(this.size);
+    this.grid        = new Grid(this.size, null, this.mesh, this.scene);
     this.score       = 0;
     this.over        = false;
     this.won         = false;
@@ -61,6 +63,58 @@ GameManager.prototype.setup = function () {
   // Update the actuator
   this.actuate();
 };
+GameManager.prototype.animate = function() {
+        requestAnimationFrame($.proxy(this.animate, this));
+        //this.controls.update();
+
+        for(var i = 0; i < this.scene.children.length; i++) {
+           this.scene.children[i].rotation.x += 0.05;
+           this.scene.children[i].rotation.y += 0.01;
+        }
+
+        this.renderer.render( this.scene, this.camera ); 
+  }
+
+GameManager.prototype.setup_graphics = function () {
+  this.camera     = null;
+  //this.controls   = null;
+  this.scene      = null;
+  this.mesh = null;
+
+  var tile_container = $(".tile-container");
+  var x = 470, y = 470;
+
+  this.renderer = new THREE.WebGLRenderer({ alpha: true });
+  this.renderer.setSize( x, y );
+  this.renderer.setClearColor( 0xbbada0, 1);
+  tile_container.empty();
+  tile_container.append( this.renderer.domElement );
+  //document.body.appendChild(this.renderer.domElement);
+  this.camera = new THREE.PerspectiveCamera( 70, x / y, 1, 20000 );
+  this.camera.position.x = 150;
+  this.camera.position.y = 150;
+  this.camera.position.z = 315;
+  //this.camera.rotation.z = Math.PI;
+  //this.controls = new THREE.OrbitControls(this.camera);
+  this.scene = new THREE.Scene();
+  var geometry = new THREE.BoxGeometry( 20, 20, 20 );
+  //var texture = THREE.ImageUtils.loadTexture( 'textures/crate.gif' );
+
+  var material = new THREE.MeshBasicMaterial( {color:0xeee4da, wireframe: false, vertexColors: THREE.VertexColors} );
+
+  this.mesh = new THREE.Mesh( geometry, material );
+
+  window.addEventListener( 'resize', onWindowResize, false );
+  function onWindowResize() {
+    this.camera.aspect = x / y;
+    this.camera.updateProjectionMatrix();
+
+    this.renderer.setSize( x, y);
+  }
+
+  this.animate();
+}
+
 
 // Set up the initial tiles to start the game with
 GameManager.prototype.addStartTiles = function () {
@@ -73,7 +127,7 @@ GameManager.prototype.addStartTiles = function () {
 GameManager.prototype.addRandomTile = function () {
   if (this.grid.cellsAvailable()) {
     var value = Math.random() < 0.9 ? 2 : 4;
-    var tile = new Tile(this.grid.randomAvailableCell(), value);
+    var tile = new Tile(this.grid.randomAvailableCell(), value, this.mesh.clone(), this.scene);
 
     this.grid.insertTile(tile);
   }
@@ -98,7 +152,7 @@ GameManager.prototype.actuate = function () {
     won:        this.won,
     bestScore:  this.storageManager.getBestScore(),
     terminated: this.isGameTerminated()
-  });
+  }, this.scene);
 
 };
 
@@ -134,7 +188,6 @@ GameManager.prototype.moveTile = function (tile, cell) {
 GameManager.prototype.move = function (direction) {
   // 0: up, 1: right, 2: down, 3: left
   var self = this;
-
   if (this.isGameTerminated()) return; // Don't do anything if the game's over
 
   var cell, tile;
@@ -142,9 +195,6 @@ GameManager.prototype.move = function (direction) {
   var vector     = this.getVector(direction);
   var traversals = this.buildTraversals(vector);
   var moved      = false;
-
-  // Save the current tile positions and remove merger information
-  this.prepareTiles();
 
   // Traverse the grid in the right direction and move tiles
   traversals.x.forEach(function (x) {
@@ -158,7 +208,7 @@ GameManager.prototype.move = function (direction) {
 
         // Only one merger per row traversal?
         if (next && next.value === tile.value && !next.mergedFrom) {
-          var merged = new Tile(positions.next, tile.value * 2);
+          var merged = new Tile(positions.next, tile.value * 2, self.mesh.clone(), self.scene);
           merged.mergedFrom = [tile, next];
 
           self.grid.insertTile(merged);
@@ -183,10 +233,13 @@ GameManager.prototype.move = function (direction) {
     });
   });
 
-  if (moved) {
-    this.addRandomTile();
+  // Save the current tile positions and remove merger information
+  this.prepareTiles(); // MAGIC
 
-    if (!this.movesAvailable()) {
+if (moved) {
+  this.addRandomTile();
+
+  if (!this.movesAvailable()) {
       this.over = true; // Game over!
     }
 
@@ -231,7 +284,7 @@ GameManager.prototype.findFarthestPosition = function (cell, vector) {
     previous = cell;
     cell     = { x: previous.x + vector.x, y: previous.y + vector.y };
   } while (this.grid.withinBounds(cell) &&
-           this.grid.cellAvailable(cell));
+   this.grid.cellAvailable(cell));
 
   return {
     farthest: previous,

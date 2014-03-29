@@ -7,7 +7,7 @@ $grid-row-cells: 4;
 $tile-size: ($field-width - $grid-spacing * ($grid-row-cells + 1)) / $grid-row-cells;
 $tile-border-radius: 3px;
 
-$mobile-threshold: $field-width + 20px;
+$mobile-threshold: 0px;
 
 $text-color: #776E65;
 $bright-text-color: #f9f6f2;

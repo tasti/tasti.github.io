@@ -7,11 +7,11 @@ function HTMLActuator() {
   this.score = 0;
 }
 
-HTMLActuator.prototype.actuate = function (grid, metadata) {
+HTMLActuator.prototype.actuate = function (grid, metadata, scene) {
   var self = this;
 
   window.requestAnimationFrame(function () {
-    self.clearContainer(self.tileContainer);
+    self.clearContainer(self.tileContainer, scene);
 
     grid.cells.forEach(function (column) {
       column.forEach(function (cell) {
@@ -40,13 +40,21 @@ HTMLActuator.prototype.continueGame = function () {
   this.clearMessage();
 };
 
-HTMLActuator.prototype.clearContainer = function (container) {
-  while (container.firstChild) {
-    container.removeChild(container.firstChild);
-  }
+HTMLActuator.prototype.clearContainer = function (container, scene) {
+   /*while (container.firstChild) {
+     container.removeChild(container.firstChild);
+    } */
+
+    //Also clear the scene:
+    if(scene) {
+      while(scene.children.length) {
+          scene.remove(scene.children[0]);
+     }
+    }
 };
 
 HTMLActuator.prototype.addTile = function (tile) {
+  
   var self = this;
 
   var wrapper   = document.createElement("div");
@@ -87,7 +95,9 @@ HTMLActuator.prototype.addTile = function (tile) {
   wrapper.appendChild(inner);
 
   // Put the tile on the board
-  this.tileContainer.appendChild(wrapper);
+  //this.tileContainer.appendChild(wrapper);
+  //console.log(tile);
+  tile.scene.add(tile.mesh);
 };
 
 HTMLActuator.prototype.applyClasses = function (element, classes) {
@@ -104,7 +114,7 @@ HTMLActuator.prototype.positionClass = function (position) {
 };
 
 HTMLActuator.prototype.updateScore = function (score) {
-  this.clearContainer(this.scoreContainer);
+  this.clearContainer(this.scoreContainer, null);
 
   var difference = score - this.score;
   this.score = score;
