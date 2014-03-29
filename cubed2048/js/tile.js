@@ -20,7 +20,7 @@ function Tile(position, value, _mesh, scene) {
 
   context1.fillStyle = "#" + valueToHex(this.value, colors).toUpperCase();
   context1.fillRect(0,0,1000,1000);
-  context1.strokeText(this.value.toString(), 105, 105);
+  context1.strokeText(this.value.toString(), 125, 105);
 
     
   // canvas contents will be used for a texture
@@ -44,11 +44,65 @@ Tile.prototype.savePosition = function () {
   this.previousPosition = { x: this.x, y: this.y };
 };
 
-Tile.prototype.updatePosition = function (position) {
+Tile.prototype.updatePosition = function (position, vector, GMContext, c, t) {
+  this.mesh.position.x = this.x * 110;
+  this.mesh.position.y = this.y * 110;
   this.x = position.x;
   this.y = position.y;
-  this.mesh.position.x = position.x * 110;
-  this.mesh.position.y = position.y * 110;
+  //this.mesh.position.x = position.x * 110;
+  //this.mesh.position.y = position.y * 110;
+
+  var self = this;
+  var doneX = false;
+  var doneY = false;
+
+  var intervalX = setInterval(function(){
+    //if (self.mesh.position.x == position.x * 110) {
+    if ((self.mesh.position.x >= position.x * 110 && vector.x == 1) ||
+        (self.mesh.position.x <= position.x * 110 && vector.x == -1)||
+        (vector.x == 0)) {
+      clearInterval(intervalX);
+
+      /*
+      if (doneY) {
+        GMContext.prepareTiles();
+
+        if (!GMContext.positionsEqual(c, t)) {
+          GMContext.addRandomTile();
+        }
+
+      } else {
+        doneX = true;
+      }
+      */
+    } else {
+      self.mesh.position.x += vector.x * 16;
+    }
+  },1);
+
+  var intervalY = setInterval(function(){
+    //if (self.mesh.position.y == position.y * 110) {
+    if ((self.mesh.position.y >= position.y * 110 && vector.y == 1) ||
+        (self.mesh.position.y <= position.y * 110 && vector.y == -1)||
+        (vector.y == 0)) {
+      clearInterval(intervalY);
+
+      /*
+      if (doneX) {
+        GMContext.prepareTiles();
+
+        if (!GMContext.positionsEqual(c, t)) {
+          GMContext.addRandomTile();
+        }
+      } else {
+        doneY = true;
+      }
+      */
+    } else {
+      self.mesh.position.y += vector.y * 16;
+    }
+  },1);
+
 };
 
 Tile.prototype.serialize = function () {

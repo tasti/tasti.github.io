@@ -1,6 +1,3 @@
-var added = 0;
-var removed = 0;
-
 function Grid(size, previousState, _mesh, _scene) {
   this.size = size;
   this.mesh = _mesh;
@@ -28,7 +25,6 @@ Grid.prototype.fromState = function (state) {
     this.eachCell(
       function(tile) {
         scene.remove(tile);
-        removed--;
      });
   }
   var cells = [];
@@ -39,7 +35,7 @@ Grid.prototype.fromState = function (state) {
     for (var y = 0; y < this.size; y++) {
       var tile = state[x][y];
       var addToGrid = tile ? new Tile(tile.position, tile.value, this.mesh.clone(), this.scene) : null;
-      if(addToGrid) {this.scene.add(addToGrid); added++; }
+      if(addToGrid) {this.scene.add(addToGrid); }
       row.push(addToGrid);
     }
   }
@@ -101,14 +97,11 @@ Grid.prototype.cellContent = function (cell) {
 
 // Inserts a tile at its position
 Grid.prototype.insertTile = function (tile) {
-  added++;
   this.scene.add(tile.mesh);
   this.cells[tile.x][tile.y] = tile;
 };
 
 Grid.prototype.removeTile = function (tile) {
-  removed++;
-  console.log("Added: " + added + ", Removed: " + removed);
   this.scene.remove(tile.mesh);
   this.cells[tile.x][tile.y] = null;
 };

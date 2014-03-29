@@ -69,8 +69,8 @@ GameManager.prototype.animate = function() {
         if(this.grid) {
           this.grid.eachCell(function(x,y,cell) {
             if(cell) {
-              cell.mesh.rotation.x += cell.value / 100;
-              cell.mesh.rotation.y += cell.value / 100;
+              cell.mesh.rotation.x += cell.value / 200;
+              cell.mesh.rotation.y += cell.value / 200;
             }
           });
         }
@@ -182,10 +182,11 @@ GameManager.prototype.prepareTiles = function () {
 };
 
 // Move a tile and its representation
-GameManager.prototype.moveTile = function (tile, cell) {
+GameManager.prototype.moveTile = function (tile, cell, vector, c, t) {
   this.grid.cells[tile.x][tile.y] = null;
   this.grid.cells[cell.x][cell.y] = tile;
-  tile.updatePosition(cell);
+
+  tile.updatePosition(cell, vector, this, c, t);
 };
 
 // Move tiles on the grid in the specified direction
@@ -219,7 +220,7 @@ GameManager.prototype.move = function (direction) {
           self.grid.removeTile(tile);
 
           // Converge the two tiles' positions
-          tile.updatePosition(positions.next);
+          tile.updatePosition(positions.next, vector, self, cell, tile);
 
           // Update the score
           self.score += merged.value;
@@ -227,7 +228,7 @@ GameManager.prototype.move = function (direction) {
           // The mighty 2048 tile
           if (merged.value === 2048) self.won = true;
         } else {
-          self.moveTile(tile, positions.farthest);
+          self.moveTile(tile, positions.farthest, vector, cell, tile);
         }
 
         if (!self.positionsEqual(cell, tile)) {
@@ -241,7 +242,7 @@ GameManager.prototype.move = function (direction) {
   this.prepareTiles(); // MAGIC
 
 if (moved) {
-  this.addRandomTile();
+  this.addRandomTile();  
 
   if (!this.movesAvailable()) {
       this.over = true; // Game over!
@@ -255,9 +256,9 @@ if (moved) {
 GameManager.prototype.getVector = function (direction) {
   // Vectors representing tile movement
   var map = {
-    0: { x: 0,  y: -1 }, // Up
+    2: { x: 0,  y: -1 }, // Up
     1: { x: 1,  y: 0 },  // Right
-    2: { x: 0,  y: 1 },  // Down
+    0: { x: 0,  y: 1 },  // Down
     3: { x: -1, y: 0 }   // Left
   };
 
